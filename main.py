@@ -4,14 +4,15 @@ import logging
 # Замените эти значения на свои
 USERNAME = 'YOUR_USERNAME'
 TOKEN = 'YOUR_ACCESS_TOKEN'
+GLOBAL_PATH = "YOUR_GLOBAL_PATH"
 
 # URL для API GitHub
 BASE_URL = 'https://api.github.com'
-BAN_LIST_FILE_PATH_FOLLOWERS = 'ban_list_followers.txt'  
-BAN_LIST_FILE_PATH_FOLLOWING = 'ban_list_following.txt' 
+BAN_LIST_FILE_PATH_FOLLOWERS = f'{GLOBAL_PATH}/ban_list_followers.txt'  
+BAN_LIST_FILE_PATH_FOLLOWING = '{GLOBAL_PATH}/ban_list_following.txt' 
 
 # Настройка логирования
-logging.basicConfig(filename='subscription_manager.log', level=logging.INFO, 
+logging.basicConfig(filename=f'{GLOBAL_PATH}/subscription_manager.log', level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def load_ban_list(file_path):
