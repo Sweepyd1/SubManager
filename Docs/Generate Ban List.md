@@ -81,7 +81,7 @@ notepad ban_list_following.txt</code></pre>
     </li>
 </ol>
 
-<h3 align="center">Linux/MacOS</h3>
+<h3 align="center">Linux/macOS</h3>
 <h4>Using GUI</h4>
 <ol>
     <li><strong>Navigate to the SubManager Directory:</strong>
@@ -122,5 +122,4 @@ nano ban_list_following.txt</code></pre></p></li>
 </ul>
 
 <h2 align="center">Conclusion</h2>
-
 <p>The <code>ban_list_followers.txt</code> and <code>ban_list_following.txt</code> files are crucial for effectively managing your interactions on GitHub through SubManager. By organizing your followers and following lists, you can enhance your experience and focus on meaningful connections.</p>
