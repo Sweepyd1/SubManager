@@ -71,21 +71,21 @@ TOKEN = 'YOUR_ACCESS_TOKEN'
     </li>
     <li><strong>Configure the general settings:</strong>
         <ul>
-            <liEnter the name of the task and a description.li>
+            <li>Enter the name of the task and a description.</li>
             <li>Make sure that the correct version of Windows is selected in the <strong>Configuration for</strong> field.</li>
         </ul>
     </li>
     <li><strong>Set Trigger:</strong>
         <ul>
-            <li>Перейдите на вкладку <strong>Триггеры</strong> (<em>Triggers</em>) и нажмите <strong>Создать</strong></li>
-            <li>Select <strong>Schedule</strong></li>
+            <li>Go to the <strong>Triggers</strong> tab and click <strong>Create</strong>.</li>
+            <li>Select <strong>Schedule</strong>.</li>
             <li>Set the frequency to <strong>Every 2 hours</strong>. To do this, you can select “Daily” and then specify the execution interval.</li>
         </ul>
     </li>
     <li><strong>Customize the action:</strong>
         <ul>
-            <li>Перейдите на вкладку <strong>Действия</strong> (<em>Actions</em>) и нажмите <strong>Создать</strong></li>
-            <li><strong>Select Run Program</strong></li>
+            <li>Go to the <strong>Actions</strong> tab and click <strong>Create</strong>.</li>
+            <li><strong>Select Run Program</strong>.</li>
             <li><p><strong>In the “Program or Script”</strong> field, specify the path to the Python interpreter, for example:</p>
                 <pre><code>C:\Path\To\Python\python.exe</code></pre></li>
             <li><p><strong>In the “Arguments”</strong> field, specify the path to your script:</p>
