@@ -9,9 +9,9 @@ import time
 # Replace these values with your own
 USERNAME = 'YOUR_USERNAME'
 TOKEN = 'YOUR_ACCESS_TOKEN'
-PROMOTION_ON = True
-DAYS_PERIOD = 5
-COUNT_PROMOTION_USERS = 30
+PROMOTION_ON = True # True if you want to enable promotion
+DAYS_PERIOD = 5 # Period in days of waiting for reciprocity
+COUNT_PROMOTION_USERS = 50 # Number of new subscriptions per launch   
 
 # URL for GitHub API
 BASE_URL = 'https://api.github.com'
