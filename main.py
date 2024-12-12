@@ -9,6 +9,9 @@ import time
 # Replace these values with your own
 USERNAME = 'YOUR_USERNAME'
 TOKEN = 'YOUR_ACCESS_TOKEN'
+PROMOTION_ON = True
+DAYS_PERIOD = 5
+COUNT_PROMOTION_USERS = 30
 
 # URL for GitHub API
 BASE_URL = 'https://api.github.com'
@@ -33,7 +36,7 @@ def load_ban_list(file_path:str) -> set:
     except FileNotFoundError:
         return set()
 
-def get_users_list(ban_list: set, message:str, user_type:str='followers'):
+def get_users_list(ban_list: set, message:str, user_type:str='followers', current_username:str=USERNAME, isPromoted:bool=False, isPrint=True):
     """
     Gets a list of users (subscribers or subscriptions) with support for paginated navigation,
     excluding users from the ban list.
@@ -42,6 +45,8 @@ def get_users_list(ban_list: set, message:str, user_type:str='followers'):
         ban_list (set): List of users to be excluded
         message (str): Message to be output in the process
         user_type (str): Type of users to receive (‘followers’ or ‘following’)
+        username (str): GitHub username 
+        isPromoted (bool): Include promoted users in the list (default: False)
     Returns:
         list: User list
     """
@@ -52,9 +57,10 @@ def get_users_list(ban_list: set, message:str, user_type:str='followers'):
     users = []
     page = 1
     while True:
-        sys.stdout.write(f'\r{message} {LOADING_CHAR[page % 4]}')
-        sys.stdout.flush() 
-        url = f'https://github.com/{USERNAME}?tab={user_type}&page={page}'
+        if isPrint:
+            sys.stdout.write(f'\r{message} {LOADING_CHAR[page % 4]}')
+            sys.stdout.flush() 
+        url = f'https://github.com/{current_username}?tab={user_type}&page={page}'
         try:
             response = requests.get(url)
             response.raise_for_status() # Checking for errors
@@ -73,11 +79,11 @@ def get_users_list(ban_list: set, message:str, user_type:str='followers'):
                     users.append(username)
 
             # If the number of current users is less than 2, exit the loop
-            if len(current_users) < 2:
+            if len(current_users) < 2 or isPromoted:
                 break
             
             page += 1  # Go to the next page
-            time.sleep(0.5) # Delay between requests to bypass error 429
+            time.sleep(0.75) # Delay between requests to bypass error 429
 
         except requests.exceptions.HTTPError as e:
             logging.error(f'Ошибка HTTP: {e}')
@@ -99,7 +105,6 @@ def print_logo() -> None:
 _____________________________________________________________          
     """
     print(logo)
-
 
 def update_subscription(username:str, isFollowing=False) -> None:
     """
@@ -123,6 +128,76 @@ def update_subscription(username:str, isFollowing=False) -> None:
         print(message)
         logging.error(message)
 
+def promotion(follower_list:list, ban_list_followers:list, count:int) -> list:
+    """
+    Promotion logic subscribers.
+
+    Args:
+        follower_list (list): List of followers.
+        ban_list_followers (list): The list of users to be excluded from the subscription list.
+        count (int): The number of followers required to be promoted.
+    Returns:
+        list: List of users who should be promoted.
+    """
+    # Placeholder for promotion logic
+    promotion_users = []  # Placeholder for promoted users
+    counter = 0
+    for follower_current in follower_list:
+        followers_user = get_users_list(ban_list_followers, message=f"Getting {follower_current}'s latest subscribers.", current_username=follower_current, isPromoted=True, isPrint=False)
+        for new_followers in followers_user:
+            if new_followers not in follower_list:
+                sys.stdout.write(f'\rGet a list of users for promotion {LOADING_CHAR[counter % 4]}')
+                sys.stdout.flush()
+                counter += 1
+                if len(promotion_users) < count and new_followers != USERNAME:
+                    promotion_users.append(new_followers)
+                else:
+                    break
+        if len(promotion_users) >= count:
+            break  # If the required number of followers has been promoted, exit the loop
+    
+    # Saving promoted users to a text file
+    current_date = time.strftime("%Y-%m-%d", time.localtime())
+    with open("promoted_users.txt", "a") as file:
+        for user in promotion_users:
+            file.write(f"{user} {current_date}\n")
+    
+    return promotion_users
+    
+def check_promotion(days_period:int=5) -> tuple[list[str], list[str]]:
+    """Checks users who have been promoted and updates the list
+    depending on the specified time period.
+
+    :param days_period: Period in days to check, default is 5.
+    :return: A tuple of two lists:
+             - Updated users that are still active.
+             - Users that have been removed from the promotion list.
+    """
+    with open("promoted_users.txt", "r") as file:  
+        all_promoted_users = file.readlines()[:-1]  
+        
+    updated_promoted_users = [] # Clear all promoted users
+    check_promoted_users = [] # Promoted users to check
+    cutoff_time = days_period * 24 * 60 * 60
+    current_time = time.time()
+    counter = 0
+    for entry in all_promoted_users:
+        sys.stdout.write(f'\rChecking the old user list for promotion {LOADING_CHAR[counter % 4]}')
+        sys.stdout.flush() 
+        username, date_str = entry.rsplit(' ', 1)  # Split the string into username and date
+        entry_time = time.mktime(time.strptime(date_str.strip(), "%Y-%m-%d"))  
+        if current_time - entry_time <= cutoff_time: 
+            updated_promoted_users.append(f"{username} {date_str}")
+        else:
+            check_promoted_users.append(username)
+        counter += 1
+        
+    with open("promoted_users.txt", "w") as file:  
+        for line in updated_promoted_users:
+            file.write(line)  # Write the actual records back to the file
+    updated_promoted_users = [item.split()[0] for item in updated_promoted_users]
+    return updated_promoted_users, check_promoted_users
+ 
 def manage_subscriptions(ban_list_followers: set, ban_list_following: set) -> None:
     """
     Manages the user's subscriptions based on bins lists.
@@ -136,15 +211,29 @@ def manage_subscriptions(ban_list_followers: set, ban_list_following: set) -> No
     following = get_users_list(ban_list_following, message="Getting a list of subscriptions", user_type='following')
     print("\nSubscription list received!")
 
+    if PROMOTION_ON:
+        # Promote users clear
+        not_check_promotion_user, check_promotion_user = check_promotion(days_period=DAYS_PERIOD)
+        followers.extend(not_check_promotion_user)
+        following.extend(check_promotion_user)
+        print()
+        
+        # Promote users add
+        promotion_user = promotion(followers, ban_list_followers, count=COUNT_PROMOTION_USERS)
+        followers.extend(promotion_user)
+        print()
+        
     # Subscribe to everyone who subscribes to you
     for follower in followers:
         if follower not in following:
             update_subscription(follower, isFollowing=True)
+            time.sleep(0.1)
 
     # Unsubscribe from those who are not subscribed to you
     for followed in following:
         if followed not in followers:
             update_subscription(followed)
+            time.sleep(0.1)
 
 if __name__ == '__main__':
     print_logo()
