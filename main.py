@@ -145,7 +145,7 @@ def promotion(follower_list:list, ban_list_followers:list, count:int) -> list:
     for follower_current in follower_list:
         followers_user = get_users_list(ban_list_followers, message=f"Getting {follower_current}'s latest subscribers.", current_username=follower_current, isPromoted=True, isPrint=False)
         for new_followers in followers_user:
-            if new_followers not in follower_list:
+            if new_followers not in follower_list and new_followers not in promotion_users:
                 sys.stdout.write(f'\rGet a list of users for promotion {LOADING_CHAR[counter % 4]}')
                 sys.stdout.flush()
                 counter += 1
