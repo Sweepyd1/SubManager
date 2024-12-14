@@ -120,7 +120,7 @@ def update_subscription(username:str, isFollowing=False) -> None:
         print(message)
         logging.info(message)
     except requests.exceptions.HTTPError as e:
-        message = f'Failed {'subscribe' if isFollowing else 'unsubscribe'} from {username}: {e}'
+        message = f'Failed {"subscribe" if isFollowing else "unsubscribe"} from {username}: {e}'
         print(message)
         logging.error(message)
     except requests.exceptions.RequestException as e:
