@@ -124,7 +124,7 @@ def update_subscription(username:str, isFollowing=False) -> None:
         print(message)
         logging.error(message)
     except requests.exceptions.RequestException as e:
-        message = f'Query error on {'subscriptions' if isFollowing else 'unsubscribes'} for {username}: {e}'
+        message = f'Query error on {"subscriptions" if isFollowing else "unsubscribes"} for {username}: {e}'
         print(message)
         logging.error(message)
 
@@ -144,7 +144,7 @@ def promotion(follower_list:list, ban_list_followers:list, count:int) -> list:
     counter = 0
     for follower_current in follower_list:
         followers_user = get_users_list(ban_list_followers, message=f"Getting {follower_current}'s latest subscribers.", current_username=follower_current, isPromoted=True, isPrint=False)
-        for new_followers in followers_user:
+        for new_followers in followers_user :
             if new_followers not in follower_list and new_followers not in promotion_users:
                 sys.stdout.write(f'\rGet a list of users for promotion {LOADING_CHAR[counter % 4]}')
                 sys.stdout.flush()
@@ -158,9 +158,14 @@ def promotion(follower_list:list, ban_list_followers:list, count:int) -> list:
     
     # Saving promoted users to a text file
     current_date = time.strftime("%Y-%m-%d", time.localtime())
-    with open("promoted_users.txt", "a") as file:
-        for user in promotion_users:
-            file.write(f"{user} {current_date}\n")
+    try:
+        with open(f"{GLOBAL_PATH}/promoted_users.txt", "a") as file:
+            for user in promotion_users:
+                file.write(f"{user} {current_date}\n")
+    except FileNotFoundError:
+        with open(f"{GLOBAL_PATH}/promoted_users.txt", "w") as file:
+            for user in promotion_users:
+                file.write(f"{user} {current_date}\n")
     
     return promotion_users
     
@@ -173,7 +178,7 @@ def check_promotion(days_period:int=5) -> tuple[list[str], list[str]]:
              - Updated users that are still active.
              - Users that have been removed from the promotion list.
     """
-    with open("promoted_users.txt", "r") as file:  
+    with open(f"{GLOBAL_PATH}/promoted_users.txt", "r") as file:  
         all_promoted_users = file.readlines()[:-1]  
         
     updated_promoted_users = [] # Clear all promoted users
@@ -192,7 +197,7 @@ def check_promotion(days_period:int=5) -> tuple[list[str], list[str]]:
             check_promoted_users.append(username)
         counter += 1
         
-    with open("promoted_users.txt", "w") as file:  
+    with open(f"{GLOBAL_PATH}/promoted_users.txt", "w") as file:  
         for line in updated_promoted_users:
             file.write(line)  # Write the actual records back to the file
     updated_promoted_users = [item.split()[0] for item in updated_promoted_users]
