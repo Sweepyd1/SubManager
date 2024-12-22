@@ -232,13 +232,13 @@ def manage_subscriptions(ban_list_followers: set, ban_list_following: set) -> No
     for follower in followers:
         if follower not in following:
             update_subscription(follower, isFollowing=True)
-            time.sleep(0.2)
+            time.sleep(0.3)
 
     # Unsubscribe from those who are not subscribed to you
     for followed in following:
         if followed not in followers:
             update_subscription(followed)
-            time.sleep(0.2)
+            time.sleep(0.3)
 
 if __name__ == '__main__':
     print_logo()
