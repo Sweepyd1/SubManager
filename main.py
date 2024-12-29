@@ -261,7 +261,7 @@ if __name__ == '__main__':
     logging.info("Script started") 
     
     print("Load config...")
-    load_config_file("./config.json")
+    load_config_file(f"{GLOBAL_PATH}/config.json")
 
     try:
         check_internet_connection()
