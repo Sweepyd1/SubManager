@@ -5,13 +5,7 @@ import time
 import os 
 import sys
 import time
-
-# Replace these values with your own
-USERNAME = 'YOUR_USERNAME'
-TOKEN = 'YOUR_ACCESS_TOKEN'
-PROMOTION_ON = True # True if you want to enable promotion
-DAYS_PERIOD = 5 # Period in days of waiting for reciprocity
-COUNT_PROMOTION_USERS = 50 # Number of new subscriptions per launch   
+import json
 
 # URL for GitHub API
 BASE_URL = 'https://api.github.com'
@@ -28,6 +22,25 @@ LOADING_CHAR = ['|', '/', '-', '\\']
 logging.basicConfig(filename=f'{GLOBAL_PATH}/subscription_manager.log', level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+def check_internet_connection() -> None:
+    """Check if the internet connection is available."""
+    try:
+        # Attempt to connect to a reliable host (GitHub)
+        requests.get("https://github.com", timeout=5)
+    except requests.ConnectionError as e:
+        raise ConnectionError("Error: No internet connection available.") from e
+
+def load_config_file(path_config_file: str) -> None:
+    global USERNAME, TOKEN, PROMOTION_ON, DAYS_PERIOD, COUNT_PROMOTION_USERS
+    """Loads the configuration file."""
+    with open(path_config_file, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    USERNAME = data["USERNAME"]
+    TOKEN = data["TOKEN"]
+    PROMOTION_ON = data["PROMOTION"]
+    DAYS_PERIOD = data["DAYS_PERIOD"]
+    COUNT_PROMOTION_USERS = data["COUNT_PROMOTION_USERS"]
+    
 def load_ban_list(file_path:str) -> set:
     """Loads a ban list from a file."""
     try:
@@ -36,7 +49,7 @@ def load_ban_list(file_path:str) -> set:
     except FileNotFoundError:
         return set()
 
-def get_users_list(ban_list: set, message:str, user_type:str='followers', current_username:str=USERNAME, isPromoted:bool=False, isPrint=True):
+def get_users_list(ban_list: set, message:str, user_type:str='followers', current_username:str=None, isPromoted:bool=False, isPrint=True):
     """
     Gets a list of users (subscribers or subscriptions) with support for paginated navigation,
     excluding users from the ban list.
@@ -50,6 +63,8 @@ def get_users_list(ban_list: set, message:str, user_type:str='followers', curren
     Returns:
         list: User list
     """
+    if current_username is None:
+        current_username = USERNAME
     if user_type not in ['followers', 'following']:
         raise ValueError("user_type must be ‘followers’ or ‘following’")
 
@@ -244,10 +259,18 @@ if __name__ == '__main__':
     print_logo()
     print("Script Started")
     logging.info("Script started") 
-
-    ban_list_followers = load_ban_list(BAN_LIST_FILE_PATH_FOLLOWERS)  
-    ban_list_following = load_ban_list(BAN_LIST_FILE_PATH_FOLLOWING)  
     
-    manage_subscriptions(ban_list_followers, ban_list_following) 
+    print("Load config...")
+    load_config_file("./config.json")
+
+    try:
+        check_internet_connection()
+       
+        ban_list_followers = load_ban_list(BAN_LIST_FILE_PATH_FOLLOWERS)  
+        ban_list_following = load_ban_list(BAN_LIST_FILE_PATH_FOLLOWING)  
+        
+        manage_subscriptions(ban_list_followers, ban_list_following) 
+    except ConnectionError as e:
+        print(e)
 
     print("Script Finished")
