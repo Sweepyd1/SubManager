@@ -1,0 +1,7 @@
+{
+    "USERNAME": "Your username",
+    "TOKEN": "Your token",
+    "PROMOTION": true,
+    "DAtS_PERIOD": 3,
+    "COUNT_PROMOTION_USERS": 500
+}
