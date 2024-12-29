@@ -1,4 +1,3 @@
-
 <div align="center">
 	<img src="./img/banner.jpg">
     <h1>Subscribe to those who subscribe to you!</h1>
@@ -21,7 +20,6 @@
     <li><strong>Automatic Subscription:</strong> The script automatically subscribes to all users who have subscribed to your account, so you don't miss out on new subscribers.</li>
     <li><strong>Automatic unsubscribe:</strong> You can easily unsubscribe users who have unsubscribed from you, which helps keep your subscription list clean.</li>
     <li><strong>Exceptions to the algorithm:</strong> SubManager provides the ability to use two files: <code>ban_list_followers.txt</code> and <code>ban_list_following.txt</code>. These files allow you to add users to a blacklist, excluding them from automatic subscriptions and unsubscriptions, giving you complete control over who you want to leave out of the automated process.</li>
-    <li><strong>Mutual Subscription Management:</strong> SubManager allows you to subscribe to new users, and if they do not reciprocate the subscription within a few days, the script will automatically unsubscribe from them. This feature is designed to help increase your audience by maintaining a list of engaged followers only.</li> </ul>
 </ul>
 <h2 align="center">Installation</h2>
 <ol>
@@ -29,13 +27,15 @@
         <pre><code>git clone https://github.com/K1rsN7/SubManager.git
 cd SubManager</code></pre>
     </li>
-    <li><strong>Customize the file <code>main.py</code>:</strong>
-    <p>Open the <code>main.py</code> file and change the following fields to your own:</p>
-    <pre><code>USERNAME = 'YOUR_USERNAME'
-TOKEN = 'YOUR_ACCESS_TOKEN'
-PROMOTION_ON = True # True if you want to enable promotion
-DAYS_PERIOD = 5 # Period in days of waiting for reciprocity
-COUNT_PROMOTION_USERS = 50 # Number of new subscriptions per launch    
+    <li><strong>Customize the file <code>config.json</code>:</strong>
+    <p>Open the <code>config.json</code> file and change the following fields to your own:</p>
+    <pre><code>{
+    "USERNAME": "Your username", 
+    "TOKEN": "Your token",
+    "PROMOTION": true,
+    "DAtS_PERIOD": 3,
+    "COUNT_PROMOTION_USERS": 500
+}
 </code></pre>
     <p>If you are unsure how to generate a personal access token, please refer to the documentation at <a href="./Docs/Generate Token.md">Generate Token.md</a> for detailed instructions.</p>
 </li>
