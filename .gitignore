@@ -1,2 +1,4 @@
-*.txt
+ban_*.txt
+promoted*.txt
 *.log
+venv

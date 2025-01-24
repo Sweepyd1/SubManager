@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from pathlib import Path
 import logging
 import time
 import os 
@@ -11,7 +12,7 @@ import json
 BASE_URL = 'https://api.github.com'
 
 # Upload the ban list
-GLOBAL_PATH = os.getcwd()
+GLOBAL_PATH = str(Path(__file__).resolve().parent)
 BAN_LIST_FILE_PATH_FOLLOWERS = f'{GLOBAL_PATH}/ban_list_followers.txt'  
 BAN_LIST_FILE_PATH_FOLLOWING = f'{GLOBAL_PATH}/ban_list_following.txt' 
 
