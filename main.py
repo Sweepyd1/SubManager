@@ -5,7 +5,6 @@ import logging
 import time
 import os 
 import sys
-import time
 import json
 
 # URL for GitHub API
@@ -23,6 +22,14 @@ LOADING_CHAR = ['|', '/', '-', '\\']
 logging.basicConfig(filename=f'{GLOBAL_PATH}/subscription_manager.log', level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Global variables
+USERNAME = None
+TOKEN = None
+PROMOTION_ON = None
+DAYS_PERIOD = None
+COUNT_PROMOTION_USERS = None
+RETRY_ON = None  
+
 def check_internet_connection() -> None:
     """Check if the internet connection is available."""
     try:
@@ -32,7 +39,7 @@ def check_internet_connection() -> None:
         raise ConnectionError("Error: No internet connection available.") from e
 
 def load_config_file(path_config_file: str) -> None:
-    global USERNAME, TOKEN, PROMOTION_ON, DAYS_PERIOD, COUNT_PROMOTION_USERS
+    global USERNAME, TOKEN, PROMOTION_ON, DAYS_PERIOD, COUNT_PROMOTION_USERS, RETRY_ON
     """Loads the configuration file."""
     with open(path_config_file, 'r', encoding='utf-8') as file:
         data = json.load(file)
@@ -41,7 +48,8 @@ def load_config_file(path_config_file: str) -> None:
     PROMOTION_ON = data["PROMOTION"]
     DAYS_PERIOD = data["DAYS_PERIOD"]
     COUNT_PROMOTION_USERS = data["COUNT_PROMOTION_USERS"]
-    
+    RETRY_ON = data.get("RETRY_ON", True)  # Default to True if not specified
+
 def load_ban_list(file_path:str) -> set:
     """Loads a ban list from a file."""
     try:
@@ -49,6 +57,31 @@ def load_ban_list(file_path:str) -> set:
             return set(line.strip() for line in file if line.strip())
     except FileNotFoundError:
         return set()
+
+def retry_request(url, method='get', max_retries=3, delay=1, **kwargs):
+    """Retry a request with exponential backoff."""
+    retries = 0
+    while retries < max_retries:
+        try:
+            if method == 'get':
+                response = requests.get(url, **kwargs)
+            elif method == 'put':
+                response = requests.put(url, **kwargs)
+            elif method == 'delete':
+                response = requests.delete(url, **kwargs)
+            else:
+                raise ValueError("Unsupported HTTP method")
+            
+            response.raise_for_status()
+            return response
+        
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code in [503, 504] and RETRY_ON:
+                retries += 1
+                time.sleep(delay * (2 ** retries))  # Exponential backoff
+            else:
+                raise e
+    raise requests.exceptions.HTTPError(f"Max retries ({max_retries}) exceeded.")
 
 def get_users_list(ban_list: set, message:str, user_type:str='followers', current_username:str=None, isPromoted:bool=False, isPrint=True):
     """
@@ -78,7 +111,7 @@ def get_users_list(ban_list: set, message:str, user_type:str='followers', curren
             sys.stdout.flush() 
         url = f'https://github.com/{current_username}?tab={user_type}&page={page}'
         try:
-            response = requests.get(url)
+            response = retry_request(url, method='get', max_retries=3, delay=1)
             response.raise_for_status() # Checking for errors
             
             # Parsing the HTML code of a page
@@ -102,7 +135,7 @@ def get_users_list(ban_list: set, message:str, user_type:str='followers', curren
             time.sleep(0.75) # Delay between requests to bypass error 429
 
         except requests.exceptions.HTTPError as e:
-            logging.error(f'Ошибка HTTP: {e}')
+            logging.error(f'HTTP Error: {e}')
             break
 
     return users
@@ -130,7 +163,10 @@ def update_subscription(username:str, isFollowing=False) -> None:
         isFollowing (bool): True if the user should be followed, False otherwise"""
     url = f'{BASE_URL}/user/following/{username}'
     try:
-        response = requests.put(url, auth=(USERNAME, TOKEN)) if isFollowing else requests.delete(url, auth=(USERNAME, TOKEN))
+        if isFollowing:
+            response = retry_request(url, method='put', max_retries=3, delay=1, auth=(USERNAME, TOKEN))
+        else:
+            response = retry_request(url, method='delete', max_retries=3, delay=1, auth=(USERNAME, TOKEN))
         response.raise_for_status()
         message = f'{"Subscribed to" if isFollowing else "Unsubscribed from"} {username}'
         print(message)
