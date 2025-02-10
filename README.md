@@ -33,8 +33,9 @@ cd SubManager</code></pre>
     "USERNAME": "Your username", 
     "TOKEN": "Your token",
     "PROMOTION": true,
-    "DAtS_PERIOD": 3,
-    "COUNT_PROMOTION_USERS": 500
+    "DAYS_PERIOD": 3,
+    "COUNT_PROMOTION_USERS": 500,
+    "RETRY_ON": true
 }
 </code></pre>
     <p>If you are unsure how to generate a personal access token, please refer to the documentation at <a href="./Docs/Generate Token.md">Generate Token.md</a> for detailed instructions.</p>
