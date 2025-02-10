@@ -76,7 +76,7 @@ def retry_request(url, method='get', max_retries=3, delay=1, **kwargs):
             return response
         
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code in [503, 504] and RETRY_ON:
+            if e.response.status_code in [503, 504, 429] and RETRY_ON:
                 retries += 1
                 time.sleep(delay * (2 ** retries))  # Exponential backoff
             else:
