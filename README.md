@@ -116,3 +116,12 @@ cd SubManager</code></pre>
 <h2 align="center">Contacts</h2>
 <p>If you have any questions, suggestions or would like to discuss the project, please contact me via Telegram: <a href="https://t.me/K1rsN7">@K1rsN7</a>.</p>
 <p>I'm always happy to hear feedback and suggestions for improving the project. Your support and ideas will help me make SubManager even better!
+
+<h2 align="center"> Star History</h2>
+<a href="https://star-history.com/#K1rsN7/SubManager&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=K1rsN7/SubManager&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=K1rsN7/SubManager&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=K1rsN7/SubManage&type=Date" />
+ </picture>
+</a>
