@@ -33,10 +33,10 @@ RETRY_ON = None
 def check_internet_connection() -> None:
     """Check if the internet connection is available."""
     try:
-        # Attempt to connect to a reliable host (GitHub)
-        requests.get("https://github.com", timeout=5)
-    except requests.ConnectionError as e:
-        raise ConnectionError("Error: No internet connection available.") from e
+        requests.get("https://github.com", timeout=10)
+    except requests.RequestException as e:
+        raise ConnectionError(f"No internet connection: {e}") from e
+
 
 def load_config_file(path_config_file: str) -> None:
     global USERNAME, TOKEN, PROMOTION_ON, DAYS_PERIOD, COUNT_PROMOTION_USERS, RETRY_ON
@@ -78,10 +78,17 @@ def retry_request(url, method='get', max_retries=3, delay=1, **kwargs):
         except requests.exceptions.HTTPError as e:
             if e.response.status_code in [503, 504, 429] and RETRY_ON:
                 retries += 1
-                time.sleep(delay * (2 ** retries))  # Exponential backoff
+                time.sleep(delay * (2 ** retries))
             else:
                 raise e
-    raise requests.exceptions.HTTPError(f"Max retries ({max_retries}) exceeded.")
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            if RETRY_ON and retries < max_retries:
+                retries += 1
+                logging.warning(f"Connection error: {e}. Retry {retries}/{max_retries}")
+                time.sleep(delay * (2 ** retries))
+            else:
+                raise e
+    raise requests.exceptions.RetryError(f"Max retries ({max_retries}) exceeded.")
 
 def get_users_list(ban_list: set, message:str, user_type:str='followers', current_username:str=None, isPromoted:bool=False, isPrint=True):
     """
