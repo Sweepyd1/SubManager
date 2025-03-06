@@ -2,3 +2,4 @@ ban_*.txt
 promoted*.txt
 *.log
 venv
+todo.md
